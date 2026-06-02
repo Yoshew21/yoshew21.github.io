@@ -78,8 +78,8 @@
 
       const meta = document.createElement('div');
       meta.className = 'meta';
-      meta.append(`★ ${repo.stargazers_count ?? 0}`);
-      meta.append(`⑂ ${repo.forks_count ?? 0}`);
+      meta.append(`Stars: ${repo.stargazers_count ?? 0}`);
+      meta.append(`Forks: ${repo.forks_count ?? 0}`);
       if (repo.updated_at) {
         const date = formatDate(repo.updated_at);
         if (date) {
@@ -158,7 +158,7 @@
 
   async function loadRepos() {
     try {
-      const response = await fetch('data/repos.json', { cache: 'no-store' });
+      const response = await fetch('data/repos.json');
       if (response.ok) {
         const payload = await response.json();
         if (Array.isArray(payload.repos) && payload.repos.length > 0) {

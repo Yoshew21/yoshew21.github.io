@@ -53,7 +53,7 @@ jobs:
                     .map(([name]) => name)
                     .slice(0, 5);
                 } catch (error) {
-                  core.warning(`Unable to fetch languages for ${repo.full_name}: ${error.message}`);
+                  console.warn(`Unable to fetch languages for ${repo.full_name}: ${error.message}`);
                 }
 
                 repos.push({
