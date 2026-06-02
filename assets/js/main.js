@@ -32,6 +32,12 @@
     repoList.replaceChildren(div);
   }
 
+  function createMetaItem(text) {
+    const span = document.createElement('span');
+    span.textContent = text;
+    return span;
+  }
+
   function renderRepos(payload) {
     const repos = Array.isArray(payload.repos) ? payload.repos : [];
 
@@ -78,12 +84,12 @@
 
       const meta = document.createElement('div');
       meta.className = 'meta';
-      meta.append(`Stars: ${repo.stargazers_count ?? 0}`);
-      meta.append(`Forks: ${repo.forks_count ?? 0}`);
+      meta.appendChild(createMetaItem(`Stars: ${repo.stargazers_count ?? 0}`));
+      meta.appendChild(createMetaItem(`Forks: ${repo.forks_count ?? 0}`));
       if (repo.updated_at) {
         const date = formatDate(repo.updated_at);
         if (date) {
-          meta.append(`Mis à jour: ${date}`);
+          meta.appendChild(createMetaItem(`Mis à jour: ${date}`));
         }
       }
 

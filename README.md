@@ -13,7 +13,7 @@ Ce dépôt déploie un portfolio GitHub Pages qui affiche automatiquement les re
 Workflow: **Update repos data**
 
 - Déclenchement manuel: `workflow_dispatch`
-- Déclenchement planifié: toutes les 12h (cron)
+- Déclenchement planifié: à 00:17 et 12:17 UTC chaque jour (cron)
 - Authentification: `GITHUB_TOKEN` (aucun secret personnalisé requis)
 
 Le workflow:
