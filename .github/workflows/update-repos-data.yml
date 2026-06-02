@@ -1,0 +1,99 @@
+name: Update repos data
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */12 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate data/repos.json
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            const username = 'Yoshew21';
+            const repos = [];
+            let page = 1;
+
+            while (true) {
+              const { data } = await github.request('GET /users/{username}/repos', {
+                username,
+                per_page: 100,
+                page,
+                type: 'public',
+                sort: 'updated',
+                direction: 'desc'
+              });
+
+              if (data.length === 0) {
+                break;
+              }
+
+              for (const repo of data) {
+                let languages = [];
+                try {
+                  const { data: languageData } = await github.request('GET /repos/{owner}/{repo}/languages', {
+                    owner: repo.owner.login,
+                    repo: repo.name
+                  });
+
+                  languages = Object.entries(languageData)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([name]) => name)
+                    .slice(0, 5);
+                } catch (error) {
+                  core.warning(`Unable to fetch languages for ${repo.full_name}: ${error.message}`);
+                }
+
+                repos.push({
+                  name: repo.name,
+                  description: repo.description,
+                  html_url: repo.html_url,
+                  stargazers_count: repo.stargazers_count,
+                  forks_count: repo.forks_count,
+                  updated_at: repo.updated_at,
+                  language: repo.language,
+                  languages
+                });
+              }
+
+              page += 1;
+            }
+
+            fs.mkdirSync('data', { recursive: true });
+            fs.writeFileSync(
+              'data/repos.json',
+              JSON.stringify(
+                {
+                  owner: username,
+                  generatedAt: new Date().toISOString(),
+                  repos
+                },
+                null,
+                2
+              ) + '\n'
+            );
+
+      - name: Commit data update
+        run: |
+          if git diff --quiet -- data/repos.json; then
+            echo "No data changes to commit"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/repos.json
+          git commit -m "chore: refresh GitHub repositories data"
+          git push
